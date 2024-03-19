@@ -9,6 +9,11 @@
 		<artifactId>javafx-graphics</artifactId>
 		<version>22-ea+16</version>
 	</dependency>
+	<dependency>
+		<groupId>org.openjfx</groupId>
+		<artifactId>javafx-controls</artifactId>
+		<version>23-ea+3</version>
+	</dependency>
   </dependencies>
  <build>
     <sourceDirectory>src</sourceDirectory>
