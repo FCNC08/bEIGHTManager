@@ -3,6 +3,7 @@ package application;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
+import education.EducationEditor;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -236,12 +237,34 @@ public class Main extends Application {
 		VBox vbox = new VBox(bar);
 		vbox.setMinHeight(height);
 		vbox.setMinWidth(width);
-		Group root = new Group();
-		SubScene MainScene = new SubScene(root, 1000, 500);
+		EducationEditor MainScene = EducationEditor.init(width, height-bar.getHeight());
 		MainScene.heightProperty().bind(vbox.heightProperty());
 		MainScene.widthProperty().bind(vbox.widthProperty());
 		MainScene.setFill(dark_grey);
 		vbox.getChildren().add(MainScene);
+		
+		Menu files = new Menu("File");
+		MenuItem new_project = new MenuItem("new");
+		new_project.setOnAction(e->{
+			MainScene.createNewProject();
+		});
+		MenuItem open = new MenuItem("open");
+		open.setOnAction(e->{
+			MainScene.open();
+		});
+		MenuItem save = new MenuItem("save");
+		save.setOnAction(e->{
+			MainScene.save();
+		});
+		MenuItem saveas = new MenuItem("save as");
+		saveas.setOnAction(e->{
+			MainScene.saveas();
+		});
+		files.getItems().addAll(new_project, open, save, saveas);
+		
+		bar.getMenus().add(files);
+		
+
 
 		dark.setOnAction(e->{
 			MainScene.setFill(dark_grey);
