@@ -1,7 +1,6 @@
 package education;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.scene.Group;
