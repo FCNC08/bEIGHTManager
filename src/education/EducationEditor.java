@@ -3,8 +3,15 @@ package education;
 import java.io.File;
 import java.util.ArrayList;
 
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -30,6 +37,52 @@ public class EducationEditor extends SubScene{
 			parameter.setCompressionMethod(CompressionMethod.DEFLATE);
 		}
 		this.Mainroot = root;
+		
+		Pane add_new = new Pane();
+		
+		Rectangle add_new_rectangle = new Rectangle(width*0.1, width*0.1);
+		add_new_rectangle.setFill(Color.ALICEBLUE);
+		Text add_new_text = new Text("Add new Component+");
+		add_new_text.setFont(new Font(width*0.007));
+		add_new_text.setLayoutX((width*0.1-add_new_text.getBoundsInLocal().getWidth())*0.5);
+		add_new_text.setLayoutY((width*0.1-add_new_text.getBoundsInLocal().getHeight())*0.5);
+		
+		add_new.getChildren().addAll(add_new_rectangle, add_new_text);
+		
+		add_new.setLayoutX(15);
+		add_new.setLayoutY(15);
+		
+		EventHandler<MouseEvent> create_new_module_handler = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent me) {
+				FileChooser fc = new FileChooser();
+				ExtensionFilter test_filter = new ExtensionFilter("Test-files (*.tst)", "*.tst");
+				ExtensionFilter lesson_filter = new ExtensionFilter("Lesson-Files (*.lsn)", "*.lsn");
+				ExtensionFilter question_filter = new ExtensionFilter("Question-file (*.qst)", "*.qst");
+				fc.getExtensionFilters().addAll(test_filter, lesson_filter, question_filter);
+				String name = fc.showSaveDialog(new Stage()).getName();
+				EducationEditors editor;
+				switch (name.substring(name.length()-4)) {
+				case ".qst":
+					editor = QuestionEditor.init(width, height, name);
+					break;
+				case ".lsn":
+					editor = LessonEditor.init(width, height, name);
+					break;
+				case ".tst":
+					editor = TestEditor.init(width, height, name);
+					break;
+				default:
+					editor = null;
+					break;
+				}
+				sections.add(editor);
+				Mainroot.getChildren().add(editor.getIcon());
+			}
+		};
+		add_new.addEventFilter(MouseEvent.MOUSE_CLICKED, create_new_module_handler);
+		Mainroot.getChildren().add(add_new);
+		
 	}
 	
 	public void createNewProject() {
