@@ -13,7 +13,7 @@ public abstract class EducationEditors extends SubScene{
 		
 	protected ZipFile file;
 	protected String name;
-	protected Pane icon;
+	protected Pane icon = new Pane();
 	protected ImageView view = new ImageView();
 	protected WritableImage image;
 	protected Text text;

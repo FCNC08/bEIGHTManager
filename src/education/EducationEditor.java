@@ -25,7 +25,7 @@ import net.lingala.zip4j.model.enums.CompressionMethod;
 public class EducationEditor extends SubScene{
 
 	protected Group Mainroot;
-	protected ArrayList<EducationEditors> sections;
+	protected ArrayList<EducationEditors> sections = new ArrayList();
 	
 	protected ZipFile file;
 	protected static ZipParameters parameter;
@@ -62,19 +62,15 @@ public class EducationEditor extends SubScene{
 				fc.getExtensionFilters().addAll(test_filter, lesson_filter, question_filter);
 				String name = fc.showSaveDialog(new Stage()).getName();
 				EducationEditors editor;
-				switch (name.substring(name.length()-4)) {
-				case ".qst":
+				String ending = name.substring(name.length()-5);
+				if(ending.contains(".qst")) {
 					editor = QuestionEditor.init(width, height, name);
-					break;
-				case ".lsn":
+				}else if(ending.contains(".lsn")) {
 					editor = LessonEditor.init(width, height, name);
-					break;
-				case ".tst":
+				}else if(ending.contains(".tst")){
 					editor = TestEditor.init(width, height, name);
-					break;
-				default:
+				}else {
 					editor = null;
-					break;
 				}
 				sections.add(editor);
 				Mainroot.getChildren().add(editor.getIcon());
