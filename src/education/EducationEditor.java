@@ -7,6 +7,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -38,6 +39,8 @@ public class EducationEditor extends SubScene{
 		}
 		this.Mainroot = root;
 		
+		HBox hbox = new HBox();
+		
 		Pane add_new = new Pane();
 		
 		Rectangle add_new_rectangle = new Rectangle(width*0.1, width*0.1);
@@ -51,7 +54,8 @@ public class EducationEditor extends SubScene{
 		
 		add_new.setLayoutX(15);
 		add_new.setLayoutY(15);
-		
+
+		hbox.getChildren().add(add_new);
 		EventHandler<MouseEvent> create_new_module_handler = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent me) {
@@ -72,13 +76,14 @@ public class EducationEditor extends SubScene{
 				}else {
 					editor = null;
 				}
-				sections.add(editor);
-				Mainroot.getChildren().add(editor.getIcon());
-			}
+					sections.add(editor);
+					editor.getIcon().setLayoutX(hbox.getBoundsInLocal().getWidth());;
+					hbox.getChildren().add(editor.getIcon());
+				}
+			
 		};
 		add_new.addEventFilter(MouseEvent.MOUSE_CLICKED, create_new_module_handler);
-		Mainroot.getChildren().add(add_new);
-		
+		Mainroot.getChildren().add(hbox);
 	}
 	
 	public void createNewProject() {
