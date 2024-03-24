@@ -7,6 +7,10 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -53,7 +57,9 @@ public class EducationEditor extends SubScene{
 		add_new.getChildren().addAll(add_new_rectangle, add_new_text);
 		
 		add_new.setLayoutX(15);
-		add_new.setLayoutY(15);
+		add_new.setLayoutY(0);
+		
+		add_new.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.MEDIUM)));
 
 		hbox.getChildren().add(add_new);
 		EventHandler<MouseEvent> create_new_module_handler = new EventHandler<MouseEvent>() {
