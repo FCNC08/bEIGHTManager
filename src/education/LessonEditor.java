@@ -4,12 +4,12 @@ import javafx.scene.Group;
 
 public class LessonEditor extends EducationEditors{
 
-	public LessonEditor(Group root, double width, double height, String name) {
-		super(root, width, height, name);
+	public LessonEditor(Group root, double width, double height, String name, EducationEditor parent) {
+		super(root, width, height, name, parent);
 	}
 	
-	public static LessonEditor init(double width, double height, String name) {
-		return new LessonEditor(new Group(), width, height, name);
+	public static LessonEditor init(double width, double height, String name, EducationEditor parent) {
+		return new LessonEditor(new Group(), width, height, name, parent);
 	}
 
 }

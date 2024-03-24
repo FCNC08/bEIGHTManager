@@ -7,12 +7,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -30,7 +25,8 @@ import net.lingala.zip4j.model.enums.CompressionMethod;
 public class EducationEditor extends SubScene{
 
 	protected Group Mainroot;
-	protected ArrayList<EducationEditors> sections = new ArrayList();
+	protected ArrayList<SubScene> sections = new ArrayList<SubScene>();
+	protected int actual_section;
 	
 	protected ZipFile file;
 	protected static ZipParameters parameter;
@@ -43,9 +39,13 @@ public class EducationEditor extends SubScene{
 		}
 		this.Mainroot = root;
 		
+		Group main_scene_root = new Group();
+		SubScene main_scene = new SubScene(main_scene_root, width, height);
+		
 		HBox hbox = new HBox();
 		
-		Pane add_new = new Pane();
+		Group add_new_root = new Group();
+		SubScene add_new_scene = new SubScene(add_new_root, width*0.1, width*0.1);
 		
 		Rectangle add_new_rectangle = new Rectangle(width*0.1, width*0.1);
 		add_new_rectangle.setFill(Color.ALICEBLUE);
@@ -54,14 +54,15 @@ public class EducationEditor extends SubScene{
 		add_new_text.setLayoutX((width*0.1-add_new_text.getBoundsInLocal().getWidth())*0.5);
 		add_new_text.setLayoutY((width*0.1-add_new_text.getBoundsInLocal().getHeight())*0.5);
 		
-		add_new.getChildren().addAll(add_new_rectangle, add_new_text);
+		add_new_root.getChildren().addAll(add_new_rectangle, add_new_text);
 		
-		add_new.setLayoutX(15);
-		add_new.setLayoutY(0);
-		
-		add_new.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.MEDIUM)));
+		add_new_scene.setLayoutX(15);
+		add_new_scene.setLayoutY(0);
+		sections.add(main_scene);
+		actual_section = 0;
 
-		hbox.getChildren().add(add_new);
+		final EducationEditor that = this;
+		hbox.getChildren().add(add_new_scene);
 		EventHandler<MouseEvent> create_new_module_handler = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent me) {
@@ -74,22 +75,46 @@ public class EducationEditor extends SubScene{
 				EducationEditors editor;
 				String ending = name.substring(name.length()-5);
 				if(ending.contains(".qst")) {
-					editor = QuestionEditor.init(width, height, name);
+					editor = QuestionEditor.init(width, height, name, that);
 				}else if(ending.contains(".lsn")) {
-					editor = LessonEditor.init(width, height, name);
+					editor = LessonEditor.init(width, height, name, that);
 				}else if(ending.contains(".tst")){
-					editor = TestEditor.init(width, height, name);
+					editor = TestEditor.init(width, height, name, that);
 				}else {
 					editor = null;
 				}
+					final int number = sections.size();
 					sections.add(editor);
+					EventHandler<MouseEvent> open_event_handler = new EventHandler<MouseEvent>() {
+						@Override
+						public void handle(MouseEvent event) {
+							Mainroot.getChildren().remove(sections.get(actual_section));
+							actual_section = number;
+							Mainroot.getChildren().add(sections.get(actual_section));
+						}
+					};
+					editor.getIcon().addEventFilter(MouseEvent.MOUSE_CLICKED, open_event_handler);
 					editor.getIcon().setLayoutX(hbox.getBoundsInLocal().getWidth());;
 					hbox.getChildren().add(editor.getIcon());
 				}
 			
 		};
-		add_new.addEventFilter(MouseEvent.MOUSE_CLICKED, create_new_module_handler);
-		Mainroot.getChildren().add(hbox);
+		add_new_scene.addEventFilter(MouseEvent.MOUSE_CLICKED, create_new_module_handler);
+		main_scene_root.getChildren().add(hbox);
+		Mainroot.getChildren().add(main_scene);
+	}
+	
+	public void next() {
+		Mainroot.getChildren().remove(sections.get(actual_section));
+		actual_section++;
+		actual_section%=sections.size();
+		Mainroot.getChildren().add(sections.get(actual_section));
+	}
+	public void back() {
+		Mainroot.getChildren().remove(sections.get(actual_section));
+		actual_section--;
+		actual_section%=sections.size();
+		Mainroot.getChildren().add(sections.get(actual_section));
 	}
 	
 	public void createNewProject() {
@@ -107,8 +132,9 @@ public class EducationEditor extends SubScene{
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
-			for(EducationEditors ee: sections) {
+			for(SubScene sub: sections) {
 				try {
+					EducationEditors ee = (EducationEditors) sub;
 					file.addFile(ee.getFile().getFile());
 				} catch (ZipException e) {
 					e.printStackTrace();
