@@ -12,4 +12,9 @@ public class LessonEditor extends EducationEditors{
 		return new LessonEditor(new Group(), width, height, name, parent);
 	}
 
+	@Override
+	public void close() {
+		snapshot(null, image);
+	}
+
 }

@@ -11,5 +11,10 @@ public class TestEditor extends EducationEditors{
 	public static TestEditor init(double width, double height, String name, EducationEditor parent) {
 		return new TestEditor(new Group(), width, height, name, parent);
 	}
+
+	@Override
+	public void close() {
+		snapshot(null, image);
+	}
 	
 }

@@ -2,6 +2,7 @@ package application;
 	
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.PrintStream;
 
 import education.EducationEditor;
 import javafx.application.Application;
@@ -55,6 +56,51 @@ public class Main extends Application {
 	}
 	
 	public static void main(String[] args) {
+		// Adding lines to output
+				System.setOut(new PrintStream(System.out) {
+
+					private StackTraceElement getCallSite() {
+						for (StackTraceElement e : Thread.currentThread().getStackTrace())
+							if (!e.getMethodName().equals("getStackTrace") && !e.getClassName().equals(getClass().getName()))
+								return e;
+						return null;
+					}
+
+					@Override
+					public void println(String s) {
+						println((Object) s);
+					}
+					
+					@Override
+					public void println(boolean b) {
+						println((Object)b);
+					}
+					
+					@Override
+					public void println(double b) {
+						println((Object)b);
+					}
+					@Override
+					public void println(int b) {
+						println((Object)b);
+					}
+					@Override
+					public void println(long b) {
+						println((Object)b);
+					}
+					@Override
+					public void println(char b) {
+						println((Object)b);
+					}
+					
+					@Override
+					public void println(Object o) {
+						StackTraceElement e = getCallSite();
+						String callSite = e == null ? "??" : String.format("%s.%s(%s:%d)", e.getClassName(), e.getMethodName(), e.getFileName(), e.getLineNumber());
+						super.println(o + "\t\tat " + callSite);
+					}
+					
+				});
 		launch(args);
 	}
 	

@@ -18,12 +18,18 @@ import net.lingala.zip4j.ZipFile;
 public abstract class EducationEditors extends SubScene{
 		
 	protected ZipFile file;
+	protected EducationEditor parent;
 	protected String name;
+	
 	protected Pane icon = new Pane();
+	protected Text text;
 	protected ImageView view = new ImageView();
 	protected WritableImage image;
+	
 	protected Text headline;
-	protected EducationEditor parent;
+	protected Group editor_root = new Group();
+	protected SubScene editor;
+	
 	public EducationEditors(Group root, double width, double height, String name, EducationEditor parent) {
 		super(root, width, height);
 		snapshot(null, image);
@@ -41,28 +47,33 @@ public abstract class EducationEditors extends SubScene{
 			parent.next();
 		});
 		next.setLayoutX(width*0.9-next.getBoundsInLocal().getWidth());
-		next.setLayoutY(height*0.85-next.getBoundsInLocal().getHeight());
+		next.setLayoutY(height*0.885-next.getBoundsInLocal().getHeight());
 		Button back = new Button("back");
 		back.setOnAction(e->{
 			close();
 			parent.back();
 		});
 		back.setLayoutX(width*0.1);
-		back.setLayoutY(height*0.85-next.getBoundsInLocal().getHeight());
+		back.setLayoutY(height*0.885-next.getBoundsInLocal().getHeight());
 		root.getChildren().addAll(next, back);
+		editor = new SubScene(editor_root, width, (height*0.785-headline.getBoundsInParent().getHeight()*0.75+back.getBoundsInParent().getHeight()));
+		editor.setLayoutY(height*0.1+headline.getBoundsInLocal().getHeight()*0.5);
+		root.getChildren().add(editor);
 		file = new ZipFile("temporary/"+name);
 		image = new WritableImage((int)(width*0.1), (int)(width*0.1));
 		snapshot(null, image);
 		view.setImage(image);
-		icon.getChildren().add(view);
 		view.setLayoutX(6);
 		view.setLayoutY(6);
+		text = new Text(name);
+		text.setFont(new Font(width*0.01));
+		text.setLayoutY(width*0.05);
+		text.setLayoutX((width*0.1-text.getBoundsInParent().getWidth())*0.5);
+		icon.getChildren().addAll(view, text);
 		icon.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.MEDIUM)));
 	}
 	
-	public void close() {
-		snapshot(null, image);
-	}
+	public abstract void close();
 	
 	public Pane getIcon() {
 		return icon;
