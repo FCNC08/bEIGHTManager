@@ -162,7 +162,8 @@ public class EducationEditor extends SubScene{
 			JSONArray order = new JSONArray();
 			for(SubScene sub: sections) {
 				try {
-					EducationEditors ee = (EducationEditors) sub;
+					if(sub instanceof EducationEditors) {
+						EducationEditors ee = (EducationEditors) sub;
 					File ee_file = ee.getFile().getFile();
 					file.addFile(ee_file, parameter);
 						JSONObject ee_object = new JSONObject();
@@ -174,7 +175,9 @@ public class EducationEditor extends SubScene{
 						ee_object.append("type", "test");
 					}
 					ee_object.append("filename", ee_file.getName());
+					ee_file.delete();
 					order.put(ee_object);
+					}					
 				} catch (ZipException e) {
 					e.printStackTrace();
 				}
@@ -199,6 +202,7 @@ public class EducationEditor extends SubScene{
 		File selected_file = fc.showSaveDialog(new Stage());
 		if(selected_file != null) {
 			file = new ZipFile(selected_file);
+			save();
 		}
 	}
 	public void remove() {
