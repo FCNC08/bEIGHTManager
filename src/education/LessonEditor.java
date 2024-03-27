@@ -91,7 +91,7 @@ public class LessonEditor extends EducationEditors{
 		}else {
 			object.append("type", "ht");
 		}
-		File temp_file = new File("temporary/question.json");
+		File temp_file = new File("temporary/content.json");
 		try(FileWriter fwriter = new FileWriter(temp_file)){
 			fwriter.write(object.toString());
 			fwriter.flush();
