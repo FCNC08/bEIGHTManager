@@ -30,7 +30,7 @@ public abstract class EducationEditors extends SubScene{
 	protected Group editor_root = new Group();
 	protected SubScene editor;
 	
-	public EducationEditors(Group root, double width, double height, String name, EducationEditor parent) {
+	public EducationEditors(Group root, double width, double height, String name, String path, EducationEditor parent) {
 		super(root, width, height);
 		snapshot(null, image);
 		this.name = name;
@@ -59,7 +59,7 @@ public abstract class EducationEditors extends SubScene{
 		editor = new SubScene(editor_root, width, (height*0.785-headline.getBoundsInParent().getHeight()*0.75+back.getBoundsInParent().getHeight()));
 		editor.setLayoutY(height*0.1+headline.getBoundsInLocal().getHeight()*0.5);
 		root.getChildren().add(editor);
-		file = new ZipFile("temporary/"+name);
+		file = new ZipFile(path);
 		image = new WritableImage((int)(width*0.1), (int)(width*0.1));
 		snapshot(null, image);
 		view.setImage(image);
