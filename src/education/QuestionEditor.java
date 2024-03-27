@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javafx.scene.Group;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -27,6 +28,8 @@ import net.lingala.zip4j.model.FileHeader;
 
 public class QuestionEditor extends EducationEditors{
 
+	protected int number;
+	
 	protected TextField question_headline = new TextField("Headline");
 	protected TextField question;
 	protected VBox answer_box = new VBox();
@@ -37,8 +40,11 @@ public class QuestionEditor extends EducationEditors{
 	protected File image_file;
 	protected Image question_image;
 	protected ImageView question_view;
-	public QuestionEditor(Group root, double width, double height, String name, String path,  EducationEditor parent) {
+	protected ComboBox<Integer> correct_answer = new ComboBox<>();
+	public QuestionEditor(Group root, double width, double height, String name, String path, int number,  EducationEditor parent) {
 		super(root, width, height, name, path, parent);
+		
+		this.number = number;
 		
 		question_headline.setFont(new Font(height*0.04));
 		question_headline.setLayoutX(width*0.4);
@@ -47,7 +53,12 @@ public class QuestionEditor extends EducationEditors{
 		question = new TextField("Enter your Question");
 		question.setFont(new Font(height*0.03));
 		question.setLayoutY(height*0.1);
-		question.setLayoutX((width-question.getBoundsInParent().getWidth())*0.5);
+		question.setLayoutX(width*0.43);
+		
+		correct_answer.setLayoutX(width*0.43);
+		correct_answer.setLayoutY(height*0.2);
+		correct_answer.getItems().addAll(1,2);
+		correct_answer.setValue(1);
 		
 		TextField answer_1 = new TextField("Answer 1");
 		answer_1.setFont(standard_answer_font);
@@ -66,6 +77,7 @@ public class QuestionEditor extends EducationEditors{
 		new_answer.addEventHandler(MouseEvent.MOUSE_CLICKED, e->{
 			TextField new_field = new TextField("Answer "+(answers.size()+1));
 			new_field.setFont(standard_answer_font);
+			correct_answer.getItems().add(answers.size()+1);
 			answers.add(new_field);
 			answer_box.getChildren().add(new_field);
 			root.requestLayout();
@@ -93,17 +105,11 @@ public class QuestionEditor extends EducationEditors{
 				root.getChildren().add(question_view);
 			}
 		});
-		
-		editor_root.getChildren().add(question_headline);
-		editor_root.getChildren().add(question);
-		editor_root.getChildren().add(answer_box);
-		editor_root.getChildren().add(new_answer);
-		editor_root.getChildren().add(add_image);
-		//editor_root.getChildren().addAll(question_headline, question, answer_box, new_answer, add_image);
+		editor_root.getChildren().addAll(question_headline, question, correct_answer, answer_box, new_answer, add_image);
 	}
 
-	public static QuestionEditor init(double width, double height, String name, String path, EducationEditor parent) {
-		return new QuestionEditor(new Group(), width, height, name, path, parent);
+	public static QuestionEditor init(double width, double height, String name, String path, int number, EducationEditor parent) {
+		return new QuestionEditor(new Group(), width, height, name, path, number, parent);
 	}
 
 	@Override
@@ -135,6 +141,8 @@ public class QuestionEditor extends EducationEditors{
 			object.append("type", "hqo");
 		}
 		object.append("optioncount", answers.size());
+		object.append("jumpto", number++);
+		object.append("correctanswer", correct_answer.getValue());
 		JSONArray options = new JSONArray();
 		for(TextField tf : answers) {
 			options.put(tf.getText());

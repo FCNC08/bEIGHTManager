@@ -95,8 +95,9 @@ public class EducationEditor extends SubScene{
 				String name = file.getName();
 				EducationEditors editor;
 				String ending = name.substring(name.length()-5);
+				final int number = sections.size();
 				if(ending.contains(".qst")) {
-					editor = QuestionEditor.init(width, height, name, file.getAbsolutePath(), that);
+					editor = QuestionEditor.init(width, height, name, file.getAbsolutePath(), number, that);
 				}else if(ending.contains(".lsn")) {
 					editor = LessonEditor.init(width, height, name, file.getAbsolutePath(), that);
 				}else if(ending.contains(".tst")){
@@ -104,7 +105,6 @@ public class EducationEditor extends SubScene{
 				}else {
 					editor = null;
 				}
-					final int number = sections.size();
 					sections.add(editor);
 					EventHandler<MouseEvent> open_event_handler = new EventHandler<MouseEvent>() {
 						@Override
