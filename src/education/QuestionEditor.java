@@ -10,9 +10,13 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -27,38 +31,78 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
 
 public class QuestionEditor extends EducationEditors{
-
+	public static final String hqoi = "headline-question-option-image";
+	public static final String hqio = "headline-question-image-option";
+	public static final String hiqo = "headline-image-question-option";
+	public static final String ihqo = "image-headline-question-option";
+	
 	protected int number;
 	
+	protected VBox vbox = new VBox(20);
+	protected ScrollPane pane = new ScrollPane(vbox);
+	
+	protected ComboBox<String> type = new ComboBox<>();
+	
 	protected TextField question_headline = new TextField("Headline");
-	protected TextField question;
+	protected TextField question = new TextField("Enter your Question");
+	
 	protected VBox answer_box = new VBox();
 	protected ArrayList<TextField> answers = new ArrayList<>();
 	protected Label new_answer = new Label("new Answer +");
-	protected Font standard_answer_font;
 	protected Label add_image = new Label("Add/Change Image +");
+	protected Font standard_answer_font;
+	
 	protected File image_file;
 	protected Image question_image;
-	protected ImageView question_view;
+	protected ImageView question_view = new ImageView(noimage);
+	protected Label correct_answer_label = new Label("Correct Answer");
 	protected ComboBox<Integer> correct_answer = new ComboBox<>();
-	public QuestionEditor(Group root, double width, double height, String name, String path, int number,  EducationEditor parent) {
-		super(root, width, height, name, path, parent);
-		
+	public QuestionEditor(Group root, double width, double height, String name, int number,  EducationEditor parent) {
+		super(root, width, height, name, parent);
 		this.number = number;
+		vbox.setAlignment(Pos.CENTER);
+		
+		type.getItems().addAll(hqoi, hqio, hiqo, ihqo);
+		type.setValue(hqoi);
+		type.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if(oldValue!=newValue) {
+					vbox.getChildren().removeAll(question_headline, question, answer_box, correct_answer_label, correct_answer, new_answer, question_view, add_image);
+					switch(newValue) {
+					case hqoi:
+						vbox.getChildren().addAll(question_headline, question, answer_box, correct_answer_label, correct_answer, new_answer, question_view, add_image);
+						break;
+					case hqio:
+						vbox.getChildren().addAll(question_headline, question, question_view, add_image, answer_box, correct_answer_label, correct_answer, new_answer);
+						break;
+					case hiqo:
+						vbox.getChildren().addAll(question_headline, question_view, add_image, question, answer_box, correct_answer_label, correct_answer, new_answer);
+						break;
+					case ihqo:
+						vbox.getChildren().addAll(question_view, add_image, question_headline, question, answer_box, correct_answer_label, correct_answer, new_answer);
+						break;
+					}
+					root.requestLayout();
+				}
+			}
+		});
 		
 		question_headline.setFont(new Font(height*0.04));
-		question_headline.setLayoutX(width*0.4);
-		question_headline.setLayoutY(height*0.01);
-		standard_answer_font = new Font(height*0.02);
-		question = new TextField("Enter your Question");
-		question.setFont(new Font(height*0.03));
-		question.setLayoutY(height*0.1);
-		question.setLayoutX(width*0.43);
+		question_headline.setBackground(background);
 		
-		correct_answer.setLayoutX(width*0.43);
-		correct_answer.setLayoutY(height*0.2);
+		standard_answer_font = new Font(height*0.02);
+		
+		question.setFont(new Font(height*0.03));
+		question.setBackground(background);
+		
+		question_view.setFitHeight(height*0.5);
+		question_view.setFitWidth(question_view.getFitHeight()*(noimage.getWidth()/noimage.getHeight()));
+		
 		correct_answer.getItems().addAll(1,2);
 		correct_answer.setValue(1);
+		correct_answer_label.setFont(standard_answer_font);
+		correct_answer_label.setTextFill(Color.WHEAT);
 		
 		TextField answer_1 = new TextField("Answer 1");
 		answer_1.setFont(standard_answer_font);
@@ -67,12 +111,8 @@ public class QuestionEditor extends EducationEditors{
 		answers.add(answer_1);
 		answers.add(answer_2);
 		answer_box.getChildren().addAll(answer_1, answer_2);
-		answer_box.setLayoutY(height*0.15+question.getBoundsInParent().getHeight());
-		answer_box.setLayoutX((width*0.2));
 		
 		new_answer.setFont(standard_answer_font);
-		new_answer.setLayoutX((width-new_answer.getBoundsInParent().getWidth())*0.5);
-		new_answer.setLayoutY(editor.getHeight()*0.9);
 		new_answer.setTextFill(Color.ALICEBLUE);
 		new_answer.addEventHandler(MouseEvent.MOUSE_CLICKED, e->{
 			TextField new_field = new TextField("Answer "+(answers.size()+1));
@@ -84,8 +124,6 @@ public class QuestionEditor extends EducationEditors{
 		});
 		
 		add_image.setFont(standard_answer_font);
-		add_image.setLayoutX((width-add_image.getBoundsInParent().getWidth())*0.5);
-		add_image.setLayoutY(editor.getHeight()*0.85);
 		add_image.setTextFill(Color.ALICEBLUE);
 		add_image.addEventHandler(MouseEvent.MOUSE_CLICKED, e->{
 			FileChooser fc = new FileChooser();
@@ -96,20 +134,21 @@ public class QuestionEditor extends EducationEditors{
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();
 			}
-			boolean is_null = question_view==null;
-			question_view = new ImageView(question_image);
-			question_view.setLayoutY(height*0.45);
-			question_view.setFitHeight(height*0.45);
+			question_view.setImage(question_image);;
 			question_view.setFitWidth(question_view.getFitHeight()*(question_image.getWidth()/question_image.getHeight()));
-			if(is_null) {
-				root.getChildren().add(question_view);
-			}
+			vbox.requestLayout();
 		});
-		editor_root.getChildren().addAll(question_headline, question, correct_answer, answer_box, new_answer, add_image);
+		pane.setPrefHeight(editor.getHeight());
+		vbox.getChildren().addAll(type, question_headline, question, answer_box, correct_answer_label, correct_answer, new_answer, question_view, add_image);
+		vbox.setBackground(background);
+		vbox.requestLayout();
+		pane.setBackground(background);
+		pane.setLayoutX((width-vbox.getBoundsInParent().getWidth())*0.5);
+		editor_root.getChildren().add(pane);
 	}
 
-	public static QuestionEditor init(double width, double height, String name, String path, int number, EducationEditor parent) {
-		return new QuestionEditor(new Group(), width, height, name, path, number, parent);
+	public static QuestionEditor init(double width, double height, String name, int number, EducationEditor parent) {
+		return new QuestionEditor(new Group(), width, height, name, number, parent);
 	}
 
 	@Override
@@ -127,27 +166,25 @@ public class QuestionEditor extends EducationEditors{
 			e.printStackTrace();
 		}
 		JSONObject object = new JSONObject();
-		object.append("headline", question_headline.getText());
-		object.append("question", question.getText());
+		object.put("headline", question_headline.getText());
+		object.put("question", question.getText());
+			object.put("type", type.getValue());
 		if(question_image != null) {
-			object.append("image", image_file.getName());
-			object.append("type", "hqoi");
+			object.put("image", image_file.getName());
 			try {
 				file.addFile(image_file, EducationEditor.parameter);
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
-		}else {
-			object.append("type", "hqo");
 		}
-		object.append("optioncount", answers.size());
-		object.append("jumpto", number++);
-		object.append("correctanswer", correct_answer.getValue());
+		object.put("optioncount", answers.size());
+		object.put("jumpto", number++);
+		object.put("correctanswer", correct_answer.getValue());
 		JSONArray options = new JSONArray();
 		for(TextField tf : answers) {
 			options.put(tf.getText());
 		}
-		object.append("options", options);
+		object.put("options", options);
 		File temp_file = new File("temporary/question.json");
 		try(FileWriter fwriter = new FileWriter(temp_file)){
 			fwriter.write(object.toString());

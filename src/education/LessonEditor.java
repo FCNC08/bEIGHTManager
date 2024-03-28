@@ -27,6 +27,7 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class LessonEditor extends EducationEditors{
@@ -49,8 +50,8 @@ public class LessonEditor extends EducationEditors{
 	protected Image lesson_image;
 	protected ImageView lesson_view = new ImageView(noimage);
 	
-	public LessonEditor(Group root, double width, double height, String name, String path, EducationEditor parent) {
-		super(root, width, height, name, path, parent);
+	public LessonEditor(Group root, double width, double height, String name, EducationEditor parent) {
+		super(root, width, height, name, parent);
 		vbox.setAlignment(Pos.CENTER);
 		
 		type.getItems().addAll(hti, hit, iht, ith);
@@ -59,7 +60,6 @@ public class LessonEditor extends EducationEditors{
 
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				System.out.println("ComboBox Changed: old value = " + oldValue + ", new value = " + newValue);
 				if(oldValue!=newValue) {
 					vbox.getChildren().clear();
 					switch(newValue) {
@@ -122,26 +122,35 @@ public class LessonEditor extends EducationEditors{
 		editor_root.getChildren().addAll(pane);
 	}
 	
-	public static LessonEditor init(double width, double height, String name, String path, EducationEditor parent) {
-		return new LessonEditor(new Group(), width, height, name, path, parent);
+	public static LessonEditor init(double width, double height, String name, EducationEditor parent) {
+		return new LessonEditor(new Group(), width, height, name, parent);
 	}
 
 	@Override
 	public void close() {
 		snapshot(null, image);
+		
+		try {
+			if(!file.getFileHeaders().isEmpty()) {
+				for(FileHeader fh : file.getFileHeaders()) {
+					file.removeFile(fh);
+				}
+			}
+			
+		} catch (ZipException e) {
+			e.printStackTrace();
+		}
 		JSONObject object = new JSONObject();
-		object.append("headline", headline.getText());
-		object.append("text", text.getText());
+		object.put("headline", headline.getText());
+		object.put("text", text.getText());
+		object.put("type", type.getValue());
 		if(lesson_image != null) {
-			object.append("type", type.getValue());
-			object.append("image", image_file.getName());
+			object.put("image", image_file.getName());
 			try {
 				file.addFile(image_file, EducationEditor.parameter);
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
-		}else {
-			object.append("type", "ht");
 		}
 		File temp_file = new File("temporary/content.json");
 		try(FileWriter fwriter = new FileWriter(temp_file)){

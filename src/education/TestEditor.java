@@ -37,8 +37,8 @@ public class TestEditor extends EducationEditors{
 	protected VBox externals = new VBox();
 	protected ArrayList<File> external_files = new ArrayList<>();
 	
-	public TestEditor(Group root, double width, double height, String name, String path, EducationEditor parent) {
-		super(root, width, height, name, path, parent);
+	public TestEditor(Group root, double width, double height, String name, EducationEditor parent) {
+		super(root, width, height, name, parent);
 		headline.setLayoutY(height*0.1);
 		headline.setLayoutX(width*0.4);
 		headline.setFont(new Font(height*0.04));
@@ -103,8 +103,8 @@ public class TestEditor extends EducationEditors{
 		editor_root.getChildren().addAll(headline, elements, externals);
 	}
 
-	public static TestEditor init(double width, double height, String name, String path, EducationEditor parent) {
-		return new TestEditor(new Group(), width, height, name, path, parent);
+	public static TestEditor init(double width, double height, String name,EducationEditor parent) {
+		return new TestEditor(new Group(), width, height, name, parent);
 	}
 
 	@Override
@@ -134,7 +134,7 @@ public class TestEditor extends EducationEditors{
 			if(xor_box.isSelected()) {
 				defaults.put("XOR");
 			}
-			space.append("defaultcomponents", defaults);
+			space.put("defaultcomponents", defaults);
 			
 			JSONArray externals = new JSONArray();
 			for(File ext_file : external_files) {
@@ -146,7 +146,7 @@ public class TestEditor extends EducationEditors{
 				}
 			}
 			
-			space.append("externalcomponents", externals);
+			space.put("externalcomponents", externals);
 			
 			File temp_file = new File("temporary/space.json");
 			try(FileWriter fwriter = new FileWriter(temp_file)){
@@ -159,8 +159,8 @@ public class TestEditor extends EducationEditors{
 			}
 			
 			JSONObject object = new JSONObject();
-			object.append("headline", headline.getText());
-			object.append("space", "space.spce");
+			object.put("headline", headline.getText());
+			object.put("space", "space.spce");
 			try {
 				file.addFile(space_file.getFile(), EducationEditor.parameter);
 			} catch (ZipException e) {

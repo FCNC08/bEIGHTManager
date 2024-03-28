@@ -92,31 +92,34 @@ public class EducationEditor extends SubScene{
 				ExtensionFilter question_filter = new ExtensionFilter("Question-file (*.qst)", "*.qst");
 				fc.getExtensionFilters().addAll(test_filter, lesson_filter, question_filter);
 				File file = fc.showSaveDialog(new Stage());
-				String name = file.getName();
-				EducationEditors editor;
-				String ending = name.substring(name.length()-5);
-				final int number = sections.size();
-				if(ending.contains(".qst")) {
-					editor = QuestionEditor.init(width, height, name, file.getAbsolutePath(), number, that);
-				}else if(ending.contains(".lsn")) {
-					editor = LessonEditor.init(width, height, name, file.getAbsolutePath(), that);
-				}else if(ending.contains(".tst")){
-					editor = TestEditor.init(width, height, name, file.getAbsolutePath(), that);
-				}else {
-					editor = null;
+				if(file != null) {
+					String name = file.getName();
+					EducationEditors editor;
+					String ending = name.substring(name.length()-5);
+					final int number = sections.size();
+					if(ending.contains(".qst")) {
+						editor = QuestionEditor.init(width, height, name, number, that);
+					}else if(ending.contains(".lsn")) {
+						editor = LessonEditor.init(width, height, name, that);
+					}else if(ending.contains(".tst")){
+						editor = TestEditor.init(width, height, name, that);
+					}else {
+						editor = null;
+					}
+						sections.add(editor);
+						EventHandler<MouseEvent> open_event_handler = new EventHandler<MouseEvent>() {
+							@Override
+							public void handle(MouseEvent event) {
+								Mainroot.getChildren().remove(sections.get(actual_section));
+								actual_section = number;
+								Mainroot.getChildren().add(sections.get(actual_section));
+							}
+						};
+						editor.getIcon().addEventFilter(MouseEvent.MOUSE_CLICKED, open_event_handler);
+						editor.getIcon().setLayoutX(hbox.getBoundsInLocal().getWidth());;
+						hbox.getChildren().add(editor.getIcon());
 				}
-					sections.add(editor);
-					EventHandler<MouseEvent> open_event_handler = new EventHandler<MouseEvent>() {
-						@Override
-						public void handle(MouseEvent event) {
-							Mainroot.getChildren().remove(sections.get(actual_section));
-							actual_section = number;
-							Mainroot.getChildren().add(sections.get(actual_section));
-						}
-					};
-					editor.getIcon().addEventFilter(MouseEvent.MOUSE_CLICKED, open_event_handler);
-					editor.getIcon().setLayoutX(hbox.getBoundsInLocal().getWidth());;
-					hbox.getChildren().add(editor.getIcon());
+				
 				}
 			
 		};
@@ -157,8 +160,8 @@ public class EducationEditor extends SubScene{
 				e.printStackTrace();
 			}
 			JSONObject object = new JSONObject();
-			object.append("name", headline.getText());
-			object.append("difficulty", difficulty.getValue());
+			object.put("name", headline.getText());
+			object.put("difficulty", difficulty.getValue());
 			JSONArray order = new JSONArray();
 			for(SubScene sub: sections) {
 				try {
@@ -168,13 +171,13 @@ public class EducationEditor extends SubScene{
 						file.addFile(ee_file, parameter);
 							JSONObject ee_object = new JSONObject();
 						if(ee instanceof QuestionEditor) {
-							ee_object.append("type", "question");
+							ee_object.put("type", "question");
 						}else if(ee instanceof LessonEditor) {
-							ee_object.append("type", "lesson");
+							ee_object.put("type", "lesson");
 						}else if(ee instanceof TestEditor) {
-							ee_object.append("type", "test");
+							ee_object.put("type", "test");
 						}
-						ee_object.append("filename", ee_file.getName());
+						ee_object.put("filename", ee_file.getName());
 						ee_file.delete();
 						order.put(ee_object);
 					}					
@@ -182,7 +185,7 @@ public class EducationEditor extends SubScene{
 					e.printStackTrace();
 				}
 			}
-			object.append("order", order);
+			object.put("order", order);
 			File temp_file = new File("temporary/settings.json");
 			try(FileWriter fwriter = new FileWriter(temp_file)){
 				fwriter.write(object.toString());
