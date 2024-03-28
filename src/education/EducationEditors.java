@@ -1,10 +1,14 @@
 package education;
 
+import application.Main;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
@@ -29,6 +33,9 @@ public abstract class EducationEditors extends SubScene{
 	protected Text headline;
 	protected Group editor_root = new Group();
 	protected SubScene editor;
+	protected static Image noimage = new Image("NoImage.jpg");
+
+	public static Background background = new Background(new BackgroundFill(Main.dark_grey, null, null));
 	
 	public EducationEditors(Group root, double width, double height, String name, String path, EducationEditor parent) {
 		super(root, width, height);

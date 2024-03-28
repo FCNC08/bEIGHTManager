@@ -164,19 +164,19 @@ public class EducationEditor extends SubScene{
 				try {
 					if(sub instanceof EducationEditors) {
 						EducationEditors ee = (EducationEditors) sub;
-					File ee_file = ee.getFile().getFile();
-					file.addFile(ee_file, parameter);
-						JSONObject ee_object = new JSONObject();
-					if(ee instanceof QuestionEditor) {
-						ee_object.append("type", "question");
-					}else if(ee instanceof LessonEditor) {
-						ee_object.append("type", "lesson");
-					}else if(ee instanceof TestEditor) {
-						ee_object.append("type", "test");
-					}
-					ee_object.append("filename", ee_file.getName());
-					ee_file.delete();
-					order.put(ee_object);
+						File ee_file = ee.getFile().getFile();
+						file.addFile(ee_file, parameter);
+							JSONObject ee_object = new JSONObject();
+						if(ee instanceof QuestionEditor) {
+							ee_object.append("type", "question");
+						}else if(ee instanceof LessonEditor) {
+							ee_object.append("type", "lesson");
+						}else if(ee instanceof TestEditor) {
+							ee_object.append("type", "test");
+						}
+						ee_object.append("filename", ee_file.getName());
+						ee_file.delete();
+						order.put(ee_object);
 					}					
 				} catch (ZipException e) {
 					e.printStackTrace();

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javafx.scene.Group;
@@ -109,72 +110,74 @@ public class TestEditor extends EducationEditors{
 	@Override
 	public void close() {
 		snapshot(null, image);
-		ZipFile space_file = new ZipFile("temporary/space.spce");
-		JSONObject space = new JSONObject();
-		JSONArray defaults = new JSONArray();
-		if(and_box.isSelected()) {
-			defaults.put("AND");
-		}
-		if(nand_box.isSelected()) {
-			defaults.put("NAND");
-		}
-		if(nor_box.isSelected()) {
-			defaults.put("NOR");
-		}
-		if(not_box.isSelected()) {
-			defaults.put("NOT");
-		}
-		if(or_box.isSelected()) {
-			defaults.put("OR");
-		}
-		if(xnor_box.isSelected()) {
-			defaults.put("XNOR");
-		}
-		if(xor_box.isSelected()) {
-			defaults.put("XOR");
-		}
-		space.append("defaultcomponents", defaults);
-		
-		JSONArray externals = new JSONArray();
-		for(File ext_file : external_files) {
-			externals.put(ext_file.getName());
+		try (ZipFile space_file = new ZipFile("temporary/space.spce")) {
+			JSONObject space = new JSONObject();
+			JSONArray defaults = new JSONArray();
+			if(and_box.isSelected()) {
+				defaults.put("AND");
+			}
+			if(nand_box.isSelected()) {
+				defaults.put("NAND");
+			}
+			if(nor_box.isSelected()) {
+				defaults.put("NOR");
+			}
+			if(not_box.isSelected()) {
+				defaults.put("NOT");
+			}
+			if(or_box.isSelected()) {
+				defaults.put("OR");
+			}
+			if(xnor_box.isSelected()) {
+				defaults.put("XNOR");
+			}
+			if(xor_box.isSelected()) {
+				defaults.put("XOR");
+			}
+			space.append("defaultcomponents", defaults);
+			
+			JSONArray externals = new JSONArray();
+			for(File ext_file : external_files) {
+				externals.put(ext_file.getName());
+				try {
+					space_file.addFile(ext_file, EducationEditor.parameter);
+				} catch (ZipException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			space.append("externalcomponents", externals);
+			
+			File temp_file = new File("temporary/space.json");
+			try(FileWriter fwriter = new FileWriter(temp_file)){
+				fwriter.write(space.toString());
+				fwriter.flush();
+				space_file.addFile(temp_file, EducationEditor.parameter);
+				temp_file.delete();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			JSONObject object = new JSONObject();
+			object.append("headline", headline.getText());
+			object.append("space", "space.spce");
 			try {
-				space_file.addFile(ext_file, EducationEditor.parameter);
+				file.addFile(space_file.getFile(), EducationEditor.parameter);
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
-		}
-		
-		space.append("externalcomponents", externals);
-		
-		File temp_file = new File("temporary/space.json");
-		try(FileWriter fwriter = new FileWriter(temp_file)){
-			fwriter.write(space.toString());
-			fwriter.flush();
-			space_file.addFile(temp_file, EducationEditor.parameter);
-			temp_file.delete();
-		} catch (IOException e) {
+			temp_file = new File("temporary/test.json");
+			try(FileWriter fwriter = new FileWriter(temp_file)){
+				fwriter.write(object.toString());
+				fwriter.flush();
+				file.addFile(temp_file, EducationEditor.parameter);
+				temp_file.delete();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (JSONException | IOException e) {
 			e.printStackTrace();
 		}
-		
-		JSONObject object = new JSONObject();
-		object.append("headline", headline.getText());
-		object.append("space", "space.spce");
-		try {
-			file.addFile(space_file.getFile(), EducationEditor.parameter);
-		} catch (ZipException e) {
-			e.printStackTrace();
-		}
-		temp_file = new File("temporary/test.json");
-		try(FileWriter fwriter = new FileWriter(temp_file)){
-			fwriter.write(object.toString());
-			fwriter.flush();
-			file.addFile(temp_file, EducationEditor.parameter);
-			temp_file.delete();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
 		parent.save();
 	}
 	
