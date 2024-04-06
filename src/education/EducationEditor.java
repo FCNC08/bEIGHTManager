@@ -14,7 +14,7 @@ import javafx.scene.SubScene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -24,7 +24,6 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.CompressionLevel;
 import net.lingala.zip4j.model.enums.CompressionMethod;
@@ -61,7 +60,8 @@ public class EducationEditor extends SubScene{
 		difficulty.setLayoutY(height*0.01);
 		difficulty.setLayoutX(width*0.5);
 		
-		HBox hbox = new HBox();
+		FlowPane hbox = new FlowPane();
+		hbox.setPrefWrapLength(width*0.9);
 		
 		Group add_new_root = new Group();
 		SubScene add_new_scene = new SubScene(add_new_root, width*0.1, width*0.1);
@@ -75,8 +75,8 @@ public class EducationEditor extends SubScene{
 		
 		add_new_root.getChildren().addAll(add_new_rectangle, add_new_text);
 		
-		add_new_scene.setLayoutX(15);
-		add_new_scene.setLayoutY(0);
+		//add_new_scene.setLayoutX(15);
+		//add_new_scene.setLayoutY(0);
 		sections.add(main_scene);
 		actual_section = 0;
 		hbox.setLayoutY(height*0.1);
@@ -116,7 +116,7 @@ public class EducationEditor extends SubScene{
 							}
 						};
 						editor.getIcon().addEventFilter(MouseEvent.MOUSE_CLICKED, open_event_handler);
-						editor.getIcon().setLayoutX(hbox.getBoundsInLocal().getWidth());;
+						//editor.getIcon().setLayoutX(hbox.getBoundsInLocal().getWidth());;
 						hbox.getChildren().add(editor.getIcon());
 				}
 				
@@ -149,7 +149,7 @@ public class EducationEditor extends SubScene{
 		if(file == null) {
 			saveas();
 		}else {
-			try {
+			/*try {
 				if(!file.getFileHeaders().isEmpty()) {
 					for(FileHeader fh : file.getFileHeaders()) {
 						try{file.removeFile(fh);}catch(ZipException e) {e.printStackTrace();}
@@ -158,7 +158,7 @@ public class EducationEditor extends SubScene{
 				
 			} catch (ZipException e) {
 				e.printStackTrace();
-			}
+			}*/
 			JSONObject object = new JSONObject();
 			object.put("name", headline.getText());
 			object.put("difficulty", difficulty.getValue());
@@ -169,7 +169,7 @@ public class EducationEditor extends SubScene{
 						EducationEditors ee = (EducationEditors) sub;
 						File ee_file = ee.getFile().getFile();
 						file.addFile(ee_file, parameter);
-							JSONObject ee_object = new JSONObject();
+						JSONObject ee_object = new JSONObject();
 						if(ee instanceof QuestionEditor) {
 							ee_object.put("type", "question");
 						}else if(ee instanceof LessonEditor) {
@@ -178,7 +178,6 @@ public class EducationEditor extends SubScene{
 							ee_object.put("type", "test");
 						}
 						ee_object.put("filename", ee_file.getName());
-						ee_file.delete();
 						order.put(ee_object);
 					}					
 				} catch (ZipException e) {

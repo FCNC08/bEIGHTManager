@@ -28,7 +28,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
 
 public class QuestionEditor extends EducationEditors{
 	public static final String hqoi = "headline-question-option-image";
@@ -154,8 +153,9 @@ public class QuestionEditor extends EducationEditors{
 	@Override
 	public void close() {
 		snapshot(null, image);
-		
-		try {
+		File temp_directory = new File("temporary/"+name.substring(0).replace(".", "-")+"/");
+		temp_directory.mkdir();
+		/*try {
 			if(!file.getFileHeaders().isEmpty()) {
 				for(FileHeader fh : file.getFileHeaders()) {
 					file.removeFile(fh);
@@ -164,11 +164,16 @@ public class QuestionEditor extends EducationEditors{
 			
 		} catch (ZipException e) {
 			e.printStackTrace();
-		}
+		}*/
 		JSONObject object = new JSONObject();
 		object.put("headline", question_headline.getText());
 		object.put("question", question.getText());
-			object.put("type", type.getValue());
+		String final_type = type.getValue();
+		final_type = final_type.replace("headline", "h");
+		final_type = final_type.replace("image", "i");
+		final_type = final_type.replace("question", "q");
+		final_type = final_type.replace("option", "o");
+		final_type = final_type.replaceAll("-", "-");
 		if(question_image != null) {
 			object.put("image", image_file.getName());
 			try {
@@ -176,6 +181,10 @@ public class QuestionEditor extends EducationEditors{
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
+			object.put("type", final_type);
+		}else {
+			final_type = final_type.replace("i", "");
+			object.put("type",final_type);
 		}
 		object.put("optioncount", answers.size());
 		object.put("jumpto", number++);
@@ -185,7 +194,7 @@ public class QuestionEditor extends EducationEditors{
 			options.put(tf.getText());
 		}
 		object.put("options", options);
-		File temp_file = new File("temporary/question.json");
+		File temp_file = new File("temporary/"+name.substring(0).replace(".", "-")+"/question.json");
 		try(FileWriter fwriter = new FileWriter(temp_file)){
 			fwriter.write(object.toString());
 			fwriter.flush();

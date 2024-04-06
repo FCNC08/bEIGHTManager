@@ -12,8 +12,10 @@ import org.json.JSONObject;
 import javafx.scene.Group;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -24,7 +26,9 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 public class TestEditor extends EducationEditors{
-	protected TextField headline = new TextField("Headline");
+	protected VBox vbox = new VBox();
+	protected ScrollPane pane = new ScrollPane(vbox);
+	protected TextArea headline = new TextArea("Headline");
 	protected VBox elements = new VBox();
 	CheckBox and_box;
 	CheckBox nand_box;
@@ -40,9 +44,13 @@ public class TestEditor extends EducationEditors{
 	public TestEditor(Group root, double width, double height, String name, EducationEditor parent) {
 		super(root, width, height, name, parent);
 		headline.setLayoutY(height*0.1);
-		headline.setLayoutX(width*0.4);
+		headline.setLayoutX(width*0.2);
+		headline.setMaxHeight(height*0.5);
 		headline.setFont(new Font(height*0.04));
+		headline.setBackground(background);
 		
+		
+		HBox chooser = new HBox();
 		Font text_font = new Font(height*0.02);
 		
 		and_box = new CheckBox("AND-Gate");
@@ -74,8 +82,6 @@ public class TestEditor extends EducationEditors{
 		xor_box.setTextFill(Color.WHEAT);
 		
 		elements.getChildren().addAll(and_box, nand_box, nor_box, not_box, or_box, xnor_box, xor_box);
-		elements.setLayoutY(height*0.3);
-		elements.setLayoutX(width*0.1);
 		
 		add_external.setFont(text_font);
 		add_external.setUnderline(true);
@@ -96,11 +102,10 @@ public class TestEditor extends EducationEditors{
 		});
 		
 		externals.getChildren().add(add_external);
-		
-		externals.setLayoutY(height*0.3);
-		externals.setLayoutX(width*0.6);
-		
-		editor_root.getChildren().addAll(headline, elements, externals);
+		chooser.getChildren().addAll(elements, externals);
+		chooser.setBackground(background);
+		vbox.getChildren().addAll(headline, chooser);
+		editor_root.getChildren().addAll(pane);
 	}
 
 	public static TestEditor init(double width, double height, String name,EducationEditor parent) {
@@ -110,7 +115,10 @@ public class TestEditor extends EducationEditors{
 	@Override
 	public void close() {
 		snapshot(null, image);
-		try (ZipFile space_file = new ZipFile("temporary/space.spce")) {
+
+		File temp_directory = new File("temporary/"+name.substring(0).replace(".", "-")+"/");
+		temp_directory.mkdir();
+		try (ZipFile space_file = new ZipFile("temporary/"+name.substring(0).replace(".", "-")+"/space.spce")) {
 			JSONObject space = new JSONObject();
 			JSONArray defaults = new JSONArray();
 			if(and_box.isSelected()) {
@@ -148,7 +156,7 @@ public class TestEditor extends EducationEditors{
 			
 			space.put("externalcomponents", externals);
 			
-			File temp_file = new File("temporary/space.json");
+			File temp_file = new File("temporary/"+name.substring(0).replace(".", "-")+"/space.json");
 			try(FileWriter fwriter = new FileWriter(temp_file)){
 				fwriter.write(space.toString());
 				fwriter.flush();
@@ -166,7 +174,7 @@ public class TestEditor extends EducationEditors{
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
-			temp_file = new File("temporary/test.json");
+			temp_file = new File("temporary/"+name.substring(0).replace(".", "-")+"/test.json");
 			try(FileWriter fwriter = new FileWriter(temp_file)){
 				fwriter.write(object.toString());
 				fwriter.flush();

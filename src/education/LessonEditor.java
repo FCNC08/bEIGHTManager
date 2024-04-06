@@ -27,7 +27,6 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class LessonEditor extends EducationEditors{
@@ -129,8 +128,9 @@ public class LessonEditor extends EducationEditors{
 	@Override
 	public void close() {
 		snapshot(null, image);
-		
-		try {
+		File temp_directory = new File("temporary/"+name.substring(0).replace(".", "-")+"/");
+		temp_directory.mkdir();
+		/*try {
 			if(!file.getFileHeaders().isEmpty()) {
 				for(FileHeader fh : file.getFileHeaders()) {
 					file.removeFile(fh);
@@ -139,11 +139,15 @@ public class LessonEditor extends EducationEditors{
 			
 		} catch (ZipException e) {
 			e.printStackTrace();
-		}
+		}*/
 		JSONObject object = new JSONObject();
-		object.put("headline", headline.getText());
-		object.put("text", text.getText());
-		object.put("type", type.getValue());
+		object.put("headline", lesson_headline.getText());
+		object.put("text", lesson_text.getText());
+		String final_type = type.getValue();
+		final_type = final_type.replace("headline", "h");
+		final_type = final_type.replace("image", "i");
+		final_type = final_type.replace("text", "t");
+		final_type = final_type.replaceAll("-", "-");
 		if(lesson_image != null) {
 			object.put("image", image_file.getName());
 			try {
@@ -151,8 +155,12 @@ public class LessonEditor extends EducationEditors{
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
+			object.put("type", final_type);
+		}else {
+			final_type = final_type.replace("i", "");
+			object.put("type",final_type);
 		}
-		File temp_file = new File("temporary/content.json");
+		File temp_file = new File("temporary/"+name.substring(0).replace(".", "-")+"/content.json");
 		try(FileWriter fwriter = new FileWriter(temp_file)){
 			fwriter.write(object.toString());
 			fwriter.flush();
