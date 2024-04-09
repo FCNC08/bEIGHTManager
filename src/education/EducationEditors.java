@@ -33,9 +33,9 @@ public abstract class EducationEditors extends SubScene{
 	protected Text headline;
 	protected Group editor_root = new Group();
 	protected SubScene editor;
-	protected static Image noimage = new Image("NoImage.jpg");
+	protected static Image noimage = new Image("/NoImage.jpg");
 
-	public static Background background = new Background(new BackgroundFill(Main.dark_grey, null, null));
+	public static Background background = new Background(new BackgroundFill(Main.light_grey, null, null));
 	
 	public EducationEditors(Group root, double width, double height, String name, EducationEditor parent) {
 		super(root, width, height);

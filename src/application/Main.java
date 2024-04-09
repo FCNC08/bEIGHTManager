@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.io.PrintStream;
 
 import education.EducationEditor;
+import education.EducationEditors;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -16,6 +17,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -137,6 +139,8 @@ public class Main extends Application {
 		light.setOnAction(e->{
 			System.out.println("light");
 			MainScene.setFill(light_grey);
+			EducationEditors.background.getFills().clear();
+			EducationEditors.background.getFills().add(new BackgroundFill(light_grey, null, null));
 		});
 		
 		Pane external_area = new Pane();

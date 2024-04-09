@@ -187,8 +187,8 @@ public class QuestionEditor extends EducationEditors{
 			object.put("type",final_type);
 		}
 		object.put("optioncount", answers.size());
-		object.put("jumpto", number++);
-		object.put("correctanswer", correct_answer.getValue());
+		object.put("jumpto", number-1);
+		object.put("correctanswer", correct_answer.getValue()-1);
 		JSONArray options = new JSONArray();
 		for(TextField tf : answers) {
 			options.put(tf.getText());
