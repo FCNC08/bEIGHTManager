@@ -96,9 +96,9 @@ public class EducationEditor extends SubScene{
 					String name = file.getName();
 					EducationEditors editor;
 					String ending = name.substring(name.length()-5);
-					final int number = (sections.size()-2);
+					final int number = (sections.size());
 					if(ending.contains(".qst")) {
-						editor = QuestionEditor.init(width, height, name, number, that);
+						editor = QuestionEditor.init(width, height, name, number-2, that);
 					}else if(ending.contains(".lsn")) {
 						editor = LessonEditor.init(width, height, name, that);
 					}else if(ending.contains(".tst")){

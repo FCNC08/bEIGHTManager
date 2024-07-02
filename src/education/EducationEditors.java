@@ -67,6 +67,7 @@ public abstract class EducationEditors extends SubScene{
 		editor.setLayoutY(height*0.1+headline.getBoundsInLocal().getHeight()*0.5);
 		root.getChildren().add(editor);
 		file = new ZipFile("temporary/"+name);
+		
 		image = new WritableImage((int)(width*0.1), (int)(width*0.1));
 		snapshot(null, image);
 		view.setImage(image);
