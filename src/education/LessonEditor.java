@@ -1,10 +1,13 @@
 package education;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.json.JSONObject;
 
@@ -26,6 +29,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -121,8 +125,73 @@ public class LessonEditor extends EducationEditors{
 		editor_root.getChildren().addAll(pane);
 	}
 	
+	public LessonEditor(Group root, double width, double height, String name, EducationEditor parent, String lesson_headline_text, String lesson_text_text, String type_text, boolean image_used, File image_file) {
+		this(root, width, height, name, parent);
+		if(type_text.contains("i")) {
+			type_text = type_text.replace("h", "headline-").replace("t", "text-").replace("i", "image-");
+			type_text = type_text.substring(0, type_text.length()-1);
+		}else {
+			type_text = type_text.replace("h", "headline-").replace("t", "text-")+"image";
+		}
+		type.setValue(type_text);
+		
+		lesson_headline.setText(lesson_headline_text);
+		lesson_text.setText(lesson_text_text);
+		
+		if(image_used) {
+			this.image_file = image_file;
+			try {
+				lesson_image = new Image(new FileInputStream(image_file));
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			}
+			lesson_view.setImage(lesson_image);;
+			lesson_view.setFitWidth(lesson_view.getFitHeight()*(lesson_image.getWidth()/lesson_image.getHeight()));
+			vbox.requestLayout();
+		}
+
+	}
+	
 	public static LessonEditor init(double width, double height, String name, EducationEditor parent) {
 		return new LessonEditor(new Group(), width, height, name, parent);
+	}
+	
+	public static LessonEditor init(double width, double height, EducationEditor parent, ZipFile file) {
+		
+		try {
+			file.extractAll("temporary/"+file.getFile().getName().replace(".", "-"));
+		} catch (ZipException e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject jsonobjekt = null;
+		try {
+			if(file.isEncrypted()) {
+				throw new IllegalArgumentException();
+			}
+			InputStream inputStream = file.getInputStream(file.getFileHeader("content.json"));
+			
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			byte[] buffer = new byte[4096];
+			int bytesRead;
+			while((bytesRead=inputStream.read(buffer))!= -1) {
+				outputStream.write(buffer, 0, bytesRead);
+			}
+			String jsonString = outputStream.toString(StandardCharsets.UTF_8);
+			jsonobjekt = new JSONObject(jsonString);
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		LessonEditor editor;
+		if(jsonobjekt.getString("type").contains("i")) {
+			editor = new LessonEditor(new Group(), width, height, file.getFile().getName(), parent, jsonobjekt.getString("headline"), jsonobjekt.getString("text"), jsonobjekt.getString("type"), 
+					true, new File("temporary/"+file.getFile().getName().replace(".", "-")+"/"+jsonobjekt.getString("image")));
+		}else {
+			editor = new LessonEditor(new Group(), width, height, file.getFile().getName(), parent, jsonobjekt.getString("headline"), jsonobjekt.getString("text"), jsonobjekt.getString("type"), false, null);
+		}
+		
+		return editor;
+		
 	}
 
 	@Override
