@@ -173,7 +173,7 @@ public class QuestionEditor extends EducationEditors{
 		final_type = final_type.replace("image", "i");
 		final_type = final_type.replace("question", "q");
 		final_type = final_type.replace("option", "o");
-		final_type = final_type.replaceAll("-", "-");
+		final_type = final_type.replaceAll("-", "");
 		if(question_image != null) {
 			object.put("image", image_file.getName());
 			try {
@@ -187,7 +187,7 @@ public class QuestionEditor extends EducationEditors{
 			object.put("type",final_type);
 		}
 		object.put("optioncount", answers.size());
-		object.put("jumpto", number++);
+		object.put("jumpto", number--);
 		object.put("correctanswer", correct_answer.getValue());
 		JSONArray options = new JSONArray();
 		for(TextField tf : answers) {
