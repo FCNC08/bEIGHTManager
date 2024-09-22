@@ -1,10 +1,13 @@
 package education;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -27,8 +30,8 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
 
 public class QuestionEditor extends EducationEditors{
 	public static final String hqoi = "headline-question-option-image";
@@ -36,6 +39,7 @@ public class QuestionEditor extends EducationEditors{
 	public static final String hiqo = "headline-image-question-option";
 	public static final String ihqo = "image-headline-question-option";
 	
+	protected Group root;
 	protected int number;
 	
 	protected VBox vbox = new VBox(20);
@@ -59,6 +63,7 @@ public class QuestionEditor extends EducationEditors{
 	protected ComboBox<Integer> correct_answer = new ComboBox<>();
 	public QuestionEditor(Group root, double width, double height, String name, int number,  EducationEditor parent) {
 		super(root, width, height, name, parent);
+		this.root = root;
 		this.number = number;
 		vbox.setAlignment(Pos.CENTER);
 		
@@ -115,12 +120,7 @@ public class QuestionEditor extends EducationEditors{
 		new_answer.setFont(standard_answer_font);
 		new_answer.setTextFill(Color.ALICEBLUE);
 		new_answer.addEventHandler(MouseEvent.MOUSE_CLICKED, e->{
-			TextField new_field = new TextField("Answer "+(answers.size()+1));
-			new_field.setFont(standard_answer_font);
-			correct_answer.getItems().add(answers.size()+1);
-			answers.add(new_field);
-			answer_box.getChildren().add(new_field);
-			root.requestLayout();
+			addAnswer("Answer "+(answers.size()+1));
 		});
 		
 		add_image.setFont(standard_answer_font);
@@ -146,16 +146,87 @@ public class QuestionEditor extends EducationEditors{
 		pane.setLayoutX((width-vbox.getBoundsInParent().getWidth())*0.5);
 		editor_root.getChildren().add(pane);
 	}
+	
+	public QuestionEditor(Group root, double width, double height, String name, int number, EducationEditor parent, String headline_text, String question_text, String type_text, int correct_answer_int, JSONArray options, boolean image_used, File image_file) {
+		this(root, width, height, name, number, parent);
+		question_headline.setText(headline_text);
+		question.setText(question_text);
+		
+		correct_answer.setValue(correct_answer_int);
+		
+		if(type_text.contains("i")) {
+			type_text = type_text.replace("h", "headline-").replace("q", "question-").replace("o", "options-").replace("i", "image-");
+			type_text = type_text.substring(0, type_text.length()-1);
+		}else {
+			type_text = type_text.replace("h", "headline-").replace("q", "question-").replace("o", "options-")+"image";
+		}
+		type.setValue(type_text);
+		
+		for(Object o : options) {
+			if(o instanceof String) {
+				addAnswer((String) o);
+			}
+		}
+		
+		if(image_used) {
+			this.image_file = image_file;
+			try {
+				question_image = new Image(new FileInputStream(image_file));
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			}
+			question_view.setImage(question_image);;
+			question_view.setFitWidth(question_view.getFitHeight()*(question_image.getWidth()/question_image.getHeight()));
+			vbox.requestLayout();
+		}
+	}
 
 	public static QuestionEditor init(double width, double height, String name, int number, EducationEditor parent) {
 		return new QuestionEditor(new Group(), width, height, name, number, parent);
+	}
+	
+	public static QuestionEditor init(double width, double height, int number, EducationEditor parent, ZipFile file) {
+		try {
+			file.extractAll("temporary/"+file.getFile().getName().replace(".", "-"));
+		} catch (ZipException e) {
+			e.printStackTrace();
+		}
+		JSONObject jsonobjekt = null;
+		try {
+			if(file.isEncrypted()) {
+				throw new IllegalArgumentException();
+			}
+			InputStream inputStream = file.getInputStream(file.getFileHeader("question.json"));
+			
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			byte[] buffer = new byte[4096];
+			int bytesRead;
+			while((bytesRead=inputStream.read(buffer))!= -1) {
+				outputStream.write(buffer, 0, bytesRead);
+			}
+			String jsonString = outputStream.toString(StandardCharsets.UTF_8);
+			jsonobjekt = new JSONObject(jsonString);
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		QuestionEditor editor;
+		if(jsonobjekt.getString("type").contains("i")) {
+			editor = new QuestionEditor(new Group(), width, height, file.getFile().getName(), number, parent, jsonobjekt.getString("headline"), jsonobjekt.getString("question"), jsonobjekt.getString("type"), jsonobjekt.getInt("correctanswer"), 
+					jsonobjekt.getJSONArray("options"), true,  new File("temporary/"+file.getFile().getName().replace(".", "-")+"/"+jsonobjekt.getString("image")));
+		}else {
+			editor = new QuestionEditor(new Group(), width, height, file.getFile().getName(), number, parent, jsonobjekt.getString("headline"), jsonobjekt.getString("question"), jsonobjekt.getString("type"), jsonobjekt.getInt("correctanswer"),
+					jsonobjekt.getJSONArray("options"), false, null);
+		}
+		return editor;
+		
 	}
 
 	@Override
 	public void close() {
 		snapshot(null, image);
-		
-		try {
+		File temp_directory = new File("temporary/"+name.substring(0).replace(".", "-")+"/");
+		temp_directory.mkdir();
+		/*try {
 			if(!file.getFileHeaders().isEmpty()) {
 				for(FileHeader fh : file.getFileHeaders()) {
 					file.removeFile(fh);
@@ -164,11 +235,16 @@ public class QuestionEditor extends EducationEditors{
 			
 		} catch (ZipException e) {
 			e.printStackTrace();
-		}
+		}*/
 		JSONObject object = new JSONObject();
 		object.put("headline", question_headline.getText());
 		object.put("question", question.getText());
-			object.put("type", type.getValue());
+		String final_type = type.getValue();
+		final_type = final_type.replace("headline", "h");
+		final_type = final_type.replace("image", "i");
+		final_type = final_type.replace("question", "q");
+		final_type = final_type.replace("option", "o");
+		final_type = final_type.replaceAll("-", "");
 		if(question_image != null) {
 			object.put("image", image_file.getName());
 			try {
@@ -176,16 +252,20 @@ public class QuestionEditor extends EducationEditors{
 			} catch (ZipException e) {
 				e.printStackTrace();
 			}
+			object.put("type", final_type);
+		}else {
+			final_type = final_type.replace("i", "");
+			object.put("type",final_type);
 		}
 		object.put("optioncount", answers.size());
-		object.put("jumpto", number++);
-		object.put("correctanswer", correct_answer.getValue());
+		object.put("jumpto", number-1);
+		object.put("correctanswer", correct_answer.getValue()-1);
 		JSONArray options = new JSONArray();
 		for(TextField tf : answers) {
 			options.put(tf.getText());
 		}
 		object.put("options", options);
-		File temp_file = new File("temporary/question.json");
+		File temp_file = new File("temporary/"+name.substring(0).replace(".", "-")+"/question.json");
 		try(FileWriter fwriter = new FileWriter(temp_file)){
 			fwriter.write(object.toString());
 			fwriter.flush();
@@ -196,5 +276,15 @@ public class QuestionEditor extends EducationEditors{
 		}
 		parent.save();
 	}
+	
+	private void addAnswer(String answer) {
+		TextField new_field = new TextField(answer);
+		new_field.setFont(standard_answer_font);
+		correct_answer.getItems().add(answers.size()+1);
+		answers.add(new_field);
+		answer_box.getChildren().add(new_field);
+		root.requestLayout();
+	}
+	
 	
 }

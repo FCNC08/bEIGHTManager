@@ -2,12 +2,18 @@ package application;
 	
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 
+import org.apache.commons.io.FileUtils;
+
 import education.EducationEditor;
+import education.EducationEditors;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
@@ -16,6 +22,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -48,6 +55,16 @@ public class Main extends Application {
 			
 			// set Scene and saves Stage
 			MainStage = primaryStage;
+			MainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+				@Override
+				public void handle(WindowEvent event) {
+					try {
+						FileUtils.cleanDirectory(new File("temporary/"));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
 			changeScene(0);
 			MainStage.show();
 		} catch(Exception e) {
@@ -137,6 +154,8 @@ public class Main extends Application {
 		light.setOnAction(e->{
 			System.out.println("light");
 			MainScene.setFill(light_grey);
+			EducationEditors.background.getFills().clear();
+			EducationEditors.background.getFills().add(new BackgroundFill(light_grey, null, null));
 		});
 		
 		Pane external_area = new Pane();
