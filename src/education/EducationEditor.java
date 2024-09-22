@@ -91,6 +91,7 @@ public class EducationEditor extends SubScene{
 				ExtensionFilter lesson_filter = new ExtensionFilter("Lesson-Files (*.lsn)", "*.lsn");
 				ExtensionFilter question_filter = new ExtensionFilter("Question-file (*.qst)", "*.qst");
 				fc.getExtensionFilters().addAll(test_filter, lesson_filter, question_filter);
+				fc.setInitialFileName("test.tst");
 				File file = fc.showSaveDialog(new Stage());
 				if(file != null) {
 					String name = file.getName();
